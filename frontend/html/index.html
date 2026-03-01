@@ -367,46 +367,23 @@
         // Добавление задачи
         async function addTask() {
             const title = taskInput.value.trim();
-            
-            if (!title) {
-                showError('Введите название задачи');
-                taskInput.focus();
-                return;
-            }
+            if (!title) return;
             
             try {
-                addBtn.disabled = true;
-                addBtn.textContent = 'Добавление...';
-                
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ title })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({title})
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                if (!response.ok) throw new Error('Network error');
                 
-                const newTask = await response.json();
-                
-                // Добавляем в начало массива
-                tasks.unshift(newTask);
-                
+                const task = await response.json();
+                tasks.unshift(task);
                 renderTasks();
-                updateStats();
-                
-                // Очищаем поле
                 taskInput.value = '';
-                
             } catch (error) {
-                showError('Ошибка добавления: ' + error.message);
-                console.error('Add error:', error);
-            } finally {
-                addBtn.disabled = false;
-                addBtn.textContent = 'Добавить';
+                alert('Ошибка: ' + error.message);
             }
         }
 

@@ -2,12 +2,14 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY requirements.txt /app/requirements.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN python3 -m pip3 install -r requirements.txt
+COPY app.py .
 
-COPY app.py /app/app.py
+# Добавьте проверку инициализации БД
+RUN python -c "from app import init_db; init_db()" || echo "DB init failed (expected if DB not running)"
 
 EXPOSE 5000
 
-RUN gunicorn --bind 0.0.0.0:5000 app:app
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--access-logfile=-", "--error-logfile=-", "app:app"]
